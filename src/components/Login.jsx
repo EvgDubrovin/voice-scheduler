@@ -1,17 +1,15 @@
 // Import necessary modules and components
-import { useState } from "react";
 import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
+import { useUser } from "../context/UserContext";
 
 function Login() {
-    // State to hold user information after login
-    const [user, setUser] = useState(null);
+    const user = useUser();
     
     // Function to handle login with Google
     const handleLogin = async () => {
         try {
-            const result = await signInWithPopup(auth, googleProvider);
-            setUser(result.user);
+            await signInWithPopup(auth, googleProvider);
         } catch (error) {
             console.error("Error during sign in:", error);
         }
@@ -21,7 +19,6 @@ function Login() {
     const handleLogout = async () => {
         try {
             await signOut(auth);
-            setUser(null);
         } catch (error) {
             console.error("Error during sign out:", error);
         }
