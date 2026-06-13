@@ -16,13 +16,14 @@ function VoiceInput() {
 
     // Set recognition properties
     recognition.continuous = true; // Keep listening until stopped
-    recognition.lang = ''; // Set language dynamically
+    recognition.lang = 'ru-RU'; // Set language to Russian (you can change this to 'en-US' for English)
     // recognition.interimResults = true; // Show interim results
 
     // If results are returned, process the recognized text with Gemini
     recognition.onresult = async (event) => {
-      if (!event.results[event.resultIndex].isFinal) return;  
+      if (!event.results[event.resultIndex].isFinal) return;
       const currentTranscript = event.results[event.resultIndex][0].transcript;
+      console.log('Распознано:', currentTranscript);
       try {
         const result = await processVoiceInput(currentTranscript);
         setEntries((prev) => [...prev, result]);
