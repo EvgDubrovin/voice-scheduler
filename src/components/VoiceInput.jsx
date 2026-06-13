@@ -25,8 +25,8 @@ function VoiceInput() {
       const currentTranscript = event.results[event.resultIndex][0].transcript;
       console.log('Распознано:', currentTranscript);
       try {
-        const result = await processVoiceInput(currentTranscript);
-        setEntries((prev) => [...prev, result]);
+        const results = await processVoiceInput(currentTranscript);
+        setEntries((prev) => [...prev, ...results]);
       } catch (error) {
         console.error("Error processing voice input:", error);
       }
@@ -57,7 +57,7 @@ function VoiceInput() {
       </button>
       <div>
         {entries.map((entry, index) => (
-          <p key={index}>{entry}</p>
+          <p key={index}>{entry.date} {entry.time} — {entry.activity}</p>
         ))}
       </div>
     </div>
