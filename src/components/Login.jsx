@@ -1,15 +1,41 @@
 // Import necessary modules and components
-import { signInWithPopup, signOut } from "firebase/auth";
+import { signInWithPopup, signOut, GoogleAuthProvider } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
-import { useUser } from "../context/UserContext";
+import { useAuth } from "../context/UserContext";
+import { getUserData, saveUserData } from "../services/firestore";
+import { createSpreadsheet } from "../services/sheets";
 
 function Login() {
-    const user = useUser();
+    const { user, setAccessToken, setSpreadsheetId } = useAuth();
     
     // Function to handle login with Google
     const handleLogin = async () => {
         try {
-            await signInWithPopup(auth, googleProvider);
+            const result = await signInWithPopup(auth, googleProvider);
+            const credential = GoogleAuthProvider.credentialFromResult(result);
+            const token = credential?.accessToken ?? null;
+
+            if (token && typeof setAccessToken === 'function') {
+                setAccessToken(token);
+            }
+
+            if (!result?.user?.uid) {
+                return;
+            }
+
+            const userData = await getUserData(result.user.uid);
+
+            if (userData?.spreadsheetId) {
+                if (typeof setSpreadsheetId === 'function') {
+                    setSpreadsheetId(userData.spreadsheetId);
+                }
+            } else if (token) {
+                const newId = await createSpreadsheet(token);
+                await saveUserData(result.user.uid, { spreadsheetId: newId });
+                if (typeof setSpreadsheetId === 'function') {
+                    setSpreadsheetId(newId);
+                }
+            }
         } catch (error) {
             console.error("Error during sign in:", error);
         }

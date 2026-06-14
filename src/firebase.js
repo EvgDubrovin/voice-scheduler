@@ -26,3 +26,9 @@ const analytics = getAnalytics(app);
 export const auth = getAuth(app);
 // Initialize GoogleAuthProvider
 export const googleProvider = new GoogleAuthProvider();
+// Add scopes for Google Drive and Sheets API to allow saving schedules to the user's Google Drive
+googleProvider.addScope('https://www.googleapis.com/auth/spreadsheets');
+googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+// Export Firestore instance for use in other parts of the application
+import { getFirestore } from "firebase/firestore";
+export const db = getFirestore(app);

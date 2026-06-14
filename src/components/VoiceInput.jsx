@@ -1,10 +1,14 @@
 import { useState, useEffect } from 'react';
 import { processVoiceInput } from '../services/gemini';
+import { useAuth } from '../context/UserContext';
+import { appendRow } from '../services/sheets';
 
 function VoiceInput() {
   const [isListening, setIsListening] = useState(false);
   const [entries, setEntries] = useState([]);
-  const [language, setLanguage] = useState('en-US');
+  const { accessToken, spreadsheetId } = useAuth();
+  console.log('accessToken:', accessToken, 'spreadsheetId:', spreadsheetId);
+//   const [language, setLanguage] = useState('en-US');
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -27,6 +31,15 @@ function VoiceInput() {
       try {
         const results = await processVoiceInput(currentTranscript);
         setEntries((prev) => [...prev, ...results]);
+
+        // If we have the necessary credentials, append the results to Google Sheets
+        if (accessToken && spreadsheetId) {
+          for (const entry of results) {
+            await appendRow(accessToken, spreadsheetId, entry);
+          }
+        } else {
+          console.warn('Missing accessToken or spreadsheetId; skip appending rows to Sheets.');
+        }
       } catch (error) {
         console.error("Error processing voice input:", error);
       }
@@ -43,7 +56,7 @@ function VoiceInput() {
     return () => {
       recognition.stop();
     };
-  }, [isListening, SpeechRecognition]);
+  }, [isListening, SpeechRecognition, accessToken, spreadsheetId]);
 
   if (!SpeechRecognition) {
     return <p>Your browser does not support voice recognition.</p>;

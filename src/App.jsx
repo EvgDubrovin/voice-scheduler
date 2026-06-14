@@ -1,9 +1,9 @@
 import Login from "./components/Login";
 import VoiceInput from "./components/VoiceInput";
-import { useUser } from "./context/UserContext";
+import { useAuth } from "./context/UserContext";
 
 function App() {
-  const user = useUser();
+  const { user } = useAuth();
 
   return user ? (
     <div>
