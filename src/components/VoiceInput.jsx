@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { processVoiceInput } from '../services/gemini';
 import { useAuth } from '../context/UserContext';
+import { getGoogleAccessToken } from '../services/googleAuth';
 import { appendRow } from '../services/sheets';
 
 function VoiceInput() {
   const [isListening, setIsListening] = useState(false);
   const [entries, setEntries] = useState([]);
-  const { accessToken, spreadsheetId } = useAuth();
+  const { accessToken, setAccessToken, spreadsheetId } = useAuth();
   console.log('accessToken:', accessToken, 'spreadsheetId:', spreadsheetId);
 //   const [language, setLanguage] = useState('en-US');
 
@@ -62,10 +63,29 @@ function VoiceInput() {
     return <p>Your browser does not support voice recognition.</p>;
   }
 
+  const handleToggleListening = async () => {
+    if (isListening) {
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      if (!accessToken) {
+        const token = await getGoogleAccessToken();
+        if (typeof setAccessToken === 'function') {
+          setAccessToken(token);
+        }
+      }
+      setIsListening(true);
+    } catch (error) {
+      console.error('Error obtaining Google access token:', error);
+    }
+  };
+
   // Render a button to toggle listening and display the entries
   return (
     <div>
-      <button onClick={() => setIsListening((prev) => !prev)}>
+      <button onClick={handleToggleListening}>
         {isListening ? '🎙 Stop Listening' : '🎙 Start Listening'}
       </button>
       <div>

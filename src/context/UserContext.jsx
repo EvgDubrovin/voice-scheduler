@@ -1,8 +1,9 @@
 import {createContext, useContext, useState, useEffect} from "react";
 import { auth } from "../firebase";
-// Import onAuthStateChanged to listen for authentication state changes
-import {onAuthStateChanged} from "firebase/auth";
 import { getUserData } from "../services/firestore";
+import { getGoogleAccessToken } from "../services/googleAuth";
+// Import necessary Firebase authentication functions and the GoogleAuthProvider
+import { onAuthStateChanged } from "firebase/auth";
 
 // Create a UserContext to hold the authenticated user information
 const UserContext = createContext(null);
@@ -20,15 +21,19 @@ function UserProvider({ children }) {
     useEffect(() => {
         // Subscribe to authentication state changes
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-            // Update the user state with the current user information
             setUser(currentUser);
             if (currentUser) {
                 const userData = await getUserData(currentUser.uid);
-                if (userData?.spreadsheetId) {
-                    setSpreadsheetId(userData.spreadsheetId);
+                if (userData?.spreadsheetId) setSpreadsheetId(userData.spreadsheetId);
+
+                try {
+                    const token = await getGoogleAccessToken();
+                    setAccessToken(token);
+                } catch (e) {
+                    console.warn('Silent token refresh failed:', e);
                 }
             }
-        });
+            });
 
         // Cleanup the subscription on unmount
         return () => unsubscribe();

@@ -1,9 +1,10 @@
 // Import necessary modules and components
-import { signInWithPopup, signOut, GoogleAuthProvider } from "firebase/auth";
+import { signInWithPopup, signOut } from "firebase/auth";
 import { auth, googleProvider } from "../firebase";
 import { useAuth } from "../context/UserContext";
 import { getUserData, saveUserData } from "../services/firestore";
 import { createSpreadsheet } from "../services/sheets";
+import { getGoogleAccessToken } from "../services/googleAuth";
 
 function Login() {
     const { user, setAccessToken, setSpreadsheetId } = useAuth();
@@ -12,18 +13,17 @@ function Login() {
     const handleLogin = async () => {
         try {
             const result = await signInWithPopup(auth, googleProvider);
-            const credential = GoogleAuthProvider.credentialFromResult(result);
-            const token = credential?.accessToken ?? null;
-
-            if (token && typeof setAccessToken === 'function') {
-                setAccessToken(token);
-            }
 
             if (!result?.user?.uid) {
                 return;
             }
 
             const userData = await getUserData(result.user.uid);
+
+            const token = await getGoogleAccessToken();
+            if (typeof setAccessToken === 'function') {
+                setAccessToken(token);
+            }
 
             if (userData?.spreadsheetId) {
                 if (typeof setSpreadsheetId === 'function') {

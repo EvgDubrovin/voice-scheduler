@@ -27,8 +27,9 @@ export const auth = getAuth(app);
 // Initialize GoogleAuthProvider
 export const googleProvider = new GoogleAuthProvider();
 // Add scopes for Google Drive and Sheets API to allow saving schedules to the user's Google Drive
-googleProvider.addScope('https://www.googleapis.com/auth/spreadsheets');
-googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
+// Сommented out because we are now using the Google Identity Services (GIS) library for OAuth2 token management, which handles scopes differently. The GIS library is used in the getGoogleAccessToken function in src/services/googleAuth.js.
+// googleProvider.addScope('https://www.googleapis.com/auth/spreadsheets');
+// googleProvider.addScope('https://www.googleapis.com/auth/drive.file');
 // Export Firestore instance for use in other parts of the application
 import { getFirestore } from "firebase/firestore";
 export const db = getFirestore(app);
