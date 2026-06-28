@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { processVoiceInput } from '../services/gemini';
+import { processVoiceInput } from '../services/ai';
 import { useAuth } from '../context/UserContext';
 import { getGoogleAccessToken } from '../services/googleAuth';
 import { appendRow } from '../services/sheets';
